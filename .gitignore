@@ -1,0 +1,28 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Simulation outputs
+output_root/
+*.root
+
+# Generated assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# IDE and local tooling
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Local CMake overrides
+CMakeLists.local.cmake

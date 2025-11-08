@@ -1,0 +1,19 @@
+# Batch macro to run 100,000 events (Co-60 source)
+
+# Initialize the simulation
+/run/initialize
+
+# Set verbosity levels (quiet)
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+# Optional: Set random seed for reproducibility
+/random/setSeeds 123456 789012
+
+# Progress print every 10k events
+/run/printProgress 10000
+
+# Run the simulation
+/run/beamOn 100000

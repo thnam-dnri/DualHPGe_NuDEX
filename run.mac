@@ -1,0 +1,21 @@
+# Sample macro file for dual HPGe detector simulation
+# run.mac
+
+# Initialize the simulation
+/run/initialize
+
+# Set verbosity levels
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+# Optional: Set random seed for reproducibility
+/random/setSeeds 123456 789012
+
+# Run the simulation
+# Number of events to simulate
+/run/beamOn 50000
+
+# Print final statistics
+/run/printProgress 10000
