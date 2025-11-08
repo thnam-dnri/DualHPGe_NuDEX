@@ -43,7 +43,9 @@ void PrintUsage() {
     G4cout << "  -angle <degrees>    : Angle for second detector (default: 180.0)" << G4endl;
     G4cout << "  -coin               : Generate Co-60 coincidences (2 gammas per event)" << G4endl;
     G4cout << "  -single             : Generate single gammas (1 gamma per event)" << G4endl;
-    G4cout << "  -nudex [ZA]         : NuDEX thermal capture cascades (ZA=1000*Z+A; default: 17035 Cl-35)" << G4endl;
+    G4cout << "  -nudex [Z A|ZA]     : NuDEX thermal capture cascades" << G4endl;
+    G4cout << "                        Z,A integers (e.g., 24 53 for Cr-53) or ZA=1000*Z+A" << G4endl;
+    G4cout << "                        Default if omitted: 17 35 (Cl-35)" << G4endl;
     G4cout << "  -nudex-libdir <path>: Override NuDEX library directory (default: ../NuDEX/NuDEXlib/)" << G4endl;
     // -cascade mode removed
     // RAINIER file mode removed
@@ -113,15 +115,31 @@ int main(int argc, char** argv)
         }
         else if (arg == "-nudex") {
             sourceMode = NUDEX_CAPTURE;
-            // Optional ZA argument
-            if (i + 1 < argc) {
-                std::stringstream ssZA(argv[i + 1]);
-                int tmpZA;
-                if (ssZA >> tmpZA) {
+            // Optional Z A or ZA argument
+            auto parseInt = [](const std::string& s, int& out) -> bool {
+                if (s.empty()) return false;
+                char* endp = nullptr;
+                long v = strtol(s.c_str(), &endp, 10);
+                if (endp && *endp == '\0') { out = static_cast<int>(v); return true; }
+                return false;
+            };
+            if (i + 2 < argc) {
+                int z = -1, a = -1;
+                if (parseInt(argv[i + 1], z) && parseInt(argv[i + 2], a) && z > 0 && a > 0) {
+                    nudexZA = z * 1000 + a;
+                    i += 2;
+                } else if (i + 1 < argc) {
+                    int tmpZA = -1;
+                    if (parseInt(argv[i + 1], tmpZA) && tmpZA > 0) {
+                        nudexZA = tmpZA;
+                        i += 1;
+                    }
+                }
+            } else if (i + 1 < argc) {
+                int tmpZA = -1;
+                if (parseInt(argv[i + 1], tmpZA) && tmpZA > 0) {
                     nudexZA = tmpZA;
-                    i++;
-                } else {
-                    // No valid ZA provided; keep default and do not consume
+                    i += 1;
                 }
             }
         }
@@ -191,7 +209,8 @@ int main(int argc, char** argv)
         } else if (sourceMode == SINGLE_GAMMA) {
             modeStr = "Single gamma (1 gamma/event)";
         } else {
-            modeStr = "NuDEX thermal capture (ZA=" + std::to_string(nudexZA) + ")";
+            int zDisp = nudexZA / 1000; int aDisp = nudexZA % 1000;
+            modeStr = "NuDEX thermal capture (Z=" + std::to_string(zDisp) + ", A=" + std::to_string(aDisp) + ")";
             G4cout << "  NuDEX libdir: " << nudexLibDir << G4endl;
         }
         G4cout << "  Generation mode: " << modeStr << G4endl;
